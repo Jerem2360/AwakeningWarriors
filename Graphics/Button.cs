@@ -19,10 +19,11 @@ namespace AwakeningWarriors.Graphics
         private long border_width;
         private ClickCallback click_callback;
         private object[] args;
+        private float text_scale;
 
         public bool UseHandCursor;
 
-        private Button(Size size, Container owner, ClickCallback cb, object[] args) : base(size, owner)
+        private Button(Size size, Container owner, ClickCallback cb, float text_scale, object[] args) : base(size, owner)
         {
             this.border_width = 2;
 
@@ -32,23 +33,24 @@ namespace AwakeningWarriors.Graphics
                 this.args = args;
 
             this.UseHandCursor = false;
+            this.text_scale = text_scale;
 
             Root.Window.AddEventHandler<MouseEventArgs>("Click", this, this.OnClick);
             Root.Window.AddEventHandler<EventArgs>("MouseEnter", this, this.OnMouseEnter);
             Root.Window.AddEventHandler<EventArgs>("MouseLeave", this, this.OnMouseLeave);
         }
-        public Button(string text, Size size, Container owner, ClickCallback cb = null, object[] args = null) : this(size, owner, cb, args)
+        public Button(string text, float text_scale, Size size, Container owner, ClickCallback cb = null, object[] args = null) : this(size, owner, cb, text_scale, args)
         {
             this.text = text;
             this.img = this.BakeDefaultImage();
             this.hover_img = this.BakeDefaultHoverImage();
         }
-        public Button(Bitmap img, Container owner, ClickCallback cb = null, object[] args = null) : this(img.Size, owner, cb, args) 
+        public Button(Bitmap img, Container owner, ClickCallback cb = null, object[] args = null) : this(img.Size, owner, cb, 1, args) 
         {
             this.text = "";
             this.img = this.hover_img = img;
         }
-        public Button(Bitmap img, Bitmap hover_img, Container owner, ClickCallback cb = null, object[] args = null) : this(SizeMax(img.Size, hover_img.Size), owner, cb, args)
+        public Button(Bitmap img, Bitmap hover_img, Container owner, ClickCallback cb = null, object[] args = null) : this(SizeMax(img.Size, hover_img.Size), owner, cb, 1, args)
         {
             this.text = "";
             this.img = img;
@@ -73,7 +75,7 @@ namespace AwakeningWarriors.Graphics
             double fontsize = this.Size.Width * this.Size.Height;
             fontsize = Math.Sqrt(fontsize) / 10;
             
-            Font font = new Font("Helvetica", (float)fontsize, GraphicsUnit.Pixel);
+            Font font = new Font("Helvetica", (float)fontsize * this.text_scale, GraphicsUnit.Pixel);
             SizeF text_dims = g.MeasureString(this.text, font, this.Size.Width);
 
             double dw = this.Size.Width - text_dims.Width;
@@ -104,7 +106,7 @@ namespace AwakeningWarriors.Graphics
             double fontsize = this.Size.Width * this.Size.Height;
             fontsize = Math.Sqrt(fontsize) / 10;
 
-            Font font = new Font("Helvetica", (float)fontsize, GraphicsUnit.Pixel);
+            Font font = new Font("Helvetica", (float)fontsize * this.text_scale, GraphicsUnit.Pixel);
             SizeF text_dims = g.MeasureString(this.text, font, this.Size.Width);
 
             double dw = this.Size.Width - text_dims.Width;

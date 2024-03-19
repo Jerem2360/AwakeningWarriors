@@ -79,6 +79,11 @@ namespace AwakeningWarriors
             get => this._form.Cursor;
             set => this._form.Cursor = value;
         }
+        public Size Dimensions
+        {
+            get => new Size(this._form.Bounds.Width, this._form.Bounds.Height);
+            set => this._form.Bounds = new Rectangle(this._form.Bounds.Location, value);
+        }
 
         public Root()
         {
@@ -108,6 +113,7 @@ namespace AwakeningWarriors
             if (where < 0)
                 return;
             this.active_screen = where;
+            this._form.Invalidate();
         }
         private void AddSpecialEventHandler_MouseHover(EventHandler handler, GraphicElement target)
         {
@@ -139,7 +145,6 @@ namespace AwakeningWarriors
             {
                 this.click_handlers.Add(target.id, new List<EventHandler>());
             }
-            Console.WriteLine("Registered click event");
             this.click_handlers[target.id].Add(handler);
         }
         private EventHandler _MakeEventHandler<T>(Handler<T> handler) where T : EventArgs
