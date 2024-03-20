@@ -44,6 +44,7 @@ namespace AwakeningWarriors.Graphics
             get => this._aligny; 
             set => this.aligny_cache = value;
         }
+        public Container Owner => this.owner;
 
         public override Size Size => new Size((int)this._w, (int)this._h);
         public Rectangle Rect => new Rectangle(new Point((int)this.x, (int)this.y), this.Size);

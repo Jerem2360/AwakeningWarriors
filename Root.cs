@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace AwakeningWarriors
 {
@@ -16,8 +15,11 @@ namespace AwakeningWarriors
     using _ControlStyles = System.Windows.Forms.ControlStyles;
     using _PaintEventArgs = System.Windows.Forms.PaintEventArgs;
     using _MouseEventArgs = System.Windows.Forms.MouseEventArgs;
+    using _KeyEventArgs = System.Windows.Forms.KeyEventArgs;
     using _MouseEventHandler = System.Windows.Forms.MouseEventHandler;
+    using _KeyEventHandler = System.Windows.Forms.KeyEventHandler;
     using _Point = System.Drawing.Point;
+    using Cursor = System.Windows.Forms.Cursor;
 
     public class Root
     {
@@ -147,15 +149,40 @@ namespace AwakeningWarriors
             }
             this.click_handlers[target.id].Add(handler);
         }
+        private void AddSpecialEventHandler_MouseWheel(Handler<_MouseEventArgs> handler)
+        {
+            _MouseEventHandler _handler = (object sender, _MouseEventArgs e) => { 
+                handler(sender, e); 
+            };
+
+            this._form.MouseWheel += _handler;
+        }
+        private void AddSpecialEventHandler_Key(Handler<_KeyEventArgs> handler, string _event)
+        {
+            _KeyEventHandler _handler = (object sender, _KeyEventArgs e) => {
+                handler(sender, e);
+            };
+
+            if (_event == "KeyDown")
+                this._form.KeyDown += _handler;
+            if (_event == "KeyUp")
+                this._form.KeyUp += _handler;
+        }
         private EventHandler _MakeEventHandler<T>(Handler<T> handler) where T : EventArgs
         {
             return new EventHandler((object sender, EventArgs e) => { 
                 if (e is T t) 
                     handler(sender, t); 
             });
+
         }
         public bool AddEventHandler<T>(string name, GraphicElement target, Handler<T> handler) where T : EventArgs
         {
+            EventInfo _event = this._form.GetType().GetEvent(name);
+
+            if (_event == null)
+                return false;
+
             switch (name)
             {
                 case "Paint":
@@ -176,14 +203,22 @@ namespace AwakeningWarriors
                 case "Click":
                     this.AddSpecialEventHandler_Click(this._MakeEventHandler(handler), target);
                     return true;
+
+                case "MouseWheel":
+                    if (handler is Handler<_MouseEventArgs> h1)
+                        this.AddSpecialEventHandler_MouseWheel(h1);
+                    return true;
+
+                case "KeyDown":
+                    if (handler is Handler<_KeyEventArgs> h2)
+                        this.AddSpecialEventHandler_Key(h2, name);
+                    return true;
+
+                case "KeyUp":
+                    if (handler is Handler<_KeyEventArgs> h3)
+                        this.AddSpecialEventHandler_Key(h3, name);
+                    return true;
             }
-
-            EventInfo _event = this._form.GetType().GetEvent(name);
-
-
-            if (_event == null)
-                return false;
-
             _event.AddEventHandler(this._form, this._MakeEventHandler(handler));
             return true;
         }
@@ -281,6 +316,10 @@ namespace AwakeningWarriors
             }
 
             target.ForAllChildren((GraphicElement elem) => this.PropagateClicks(sender, elem, e));
+        }
+        public void Update()
+        {
+            this._form.Invalidate();
         }
     }
 }
